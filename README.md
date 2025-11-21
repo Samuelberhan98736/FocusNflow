@@ -1,6 +1,8 @@
 # FOCUSNFLOW
 
-**Description**:
+**Description**: 
+
+**Proposal**: [docs](https://docs.google.com/document/d/1LGhJ5vWJdJ8p8yqVyxAb6-0U_9ruCLfjPKMckNv9-CQ/edit?usp=sharing)
 
 
 
