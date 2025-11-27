@@ -73,7 +73,15 @@ class ApiClient{
     try {
       QuerySnapshot snapshot = await _db.collection(path).get();
       return snapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
+          .map((doc) {
+            final data = doc.data();
+            if(data is Map<String, dynamic>){
+              return data;
+            }else if(data is Map<dynamic, dynamic>){
+              return data.cast<String, dynamic>(); //convert Map<dynamic,dynamic> to <string, dynamic>
+            }
+            return <String, dynamic>{};
+          })
           .toList();
     } catch (e) {
       print("Firestore COLLECTION error at $path: $e");
