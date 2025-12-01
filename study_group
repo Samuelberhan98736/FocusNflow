@@ -1,0 +1,28 @@
+import 'package:flutter/material.dart';
+
+class StudyGroupScreen extends StatelessWidget {
+  final groups = [
+    {"subject": "Math", "groupID": "1v5i8xnm37", "members": "11/20"},
+    {"subject": "Literature", "groupID": "6c98ws7b9", "members": "7/20"}
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Study Groups")),
+      body: ListView(
+        children: groups.map((g) {
+          return Card(
+            child: ListTile(
+              title: Text("Subject: ${g["subject"]}"),
+              subtitle: Text("Group ID: ${g["groupID"]}\nMembers: ${g["members"]}"),
+              onTap: () {
+                Navigator.pushNamed(context, '/groupdetails');
+              },
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
