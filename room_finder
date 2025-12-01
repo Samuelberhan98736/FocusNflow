@@ -1,0 +1,28 @@
+import 'package:flutter/material.dart';
+
+class RoomFinderScreen extends StatelessWidget {
+  final List<Map<String, String>> rooms = [
+    {"name": "Library South 212", "id": "6we672eqi"},
+    {"name": "Library South 345", "id": "a7fa7s6co"},
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Room Finder")),
+      body: ListView(
+        children: rooms.map((r) {
+          return Card(
+            child: ListTile(
+              title: Text(r["name"]!),
+              subtitle: Text("Session ID: ${r["id"]!}"),
+              onTap: () {
+                Navigator.pushNamed(context, '/roomdetails');
+              },
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
