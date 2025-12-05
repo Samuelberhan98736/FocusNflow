@@ -3,8 +3,8 @@ import 'package:flutter/foundation.dart';
 
 import '../services/auth_service.dart';
 
-/// Provides UI-friendly auth state, loading, and error handling
-/// on top of [AuthService].
+//Provides UI-friendly auth state, loading, and error handling
+// on top of [AuthService].
 class AuthProvider extends ChangeNotifier {
   AuthProvider({AuthService? authService})
       : _authService = authService ?? AuthService() {
