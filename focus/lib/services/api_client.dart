@@ -93,4 +93,6 @@ class ApiClient{
 //current user
 User? get currentUser => _auth.currentUser;
 String? get uuid => _auth.currentUser?.uid;
+// Alias used by some services to reference the authenticated user id.
+String? get uid => _auth.currentUser?.uid;
 }
