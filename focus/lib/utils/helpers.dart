@@ -27,7 +27,7 @@ Future<T?> tryAsyncOrNull<T>(Future<T> Function() action) async {
 
 /// Converts a full name into initials (e.g., "Ada Lovelace" -> "AL").
 String initialsFromName(String name) {
-  final parts = name.trim().split(RegExp(r'\\s+')).where((p) => p.isNotEmpty);
+  final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
   final initials = parts.take(2).map((p) => p[0].toUpperCase()).join();
   return initials.isEmpty ? '?' : initials;
 }

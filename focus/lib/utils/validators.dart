@@ -15,7 +15,7 @@ class Validators {
       return 'Email is required';
     }
 
-    const pattern = r'^[\\w\\.-]+@[\\w\\.-]+\\.\\w{2,}$';
+    const pattern = r'^[\w\.-]+@[\w\.-]+\.\w{2,}$';
     if (!RegExp(pattern).hasMatch(value.trim())) {
       return 'Enter a valid email';
     }
