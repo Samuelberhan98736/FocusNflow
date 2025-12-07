@@ -1,0 +1,22 @@
+import 'package:flutter/material.dart';
+
+class NotificationsScreen extends StatelessWidget {
+  final notifications = [
+    "New Message - The Math Masters",
+    "Wong60: Location moved to Library South 326"
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Notifications")),
+      body: ListView(
+        children: notifications
+            .map((n) => Card(
+                  child: ListTile(title: Text(n)),
+                ))
+            .toList(),
+      ),
+    );
+  }
+}

@@ -1,0 +1,24 @@
+import 'package:flutter/material.dart';
+
+class GroupChatScreen extends StatelessWidget {
+  final messages = [
+    "The Math Masters",
+    "Wong60: Room changed to 324",
+    "Smith75: Got it"
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Group Chat")),
+      body: ListView(
+        children: messages
+            .map((m) => Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(m),
+                ))
+            .toList(),
+      ),
+    );
+  }
+}
