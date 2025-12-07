@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-/// Centralized application themes for both light and dark modes.
+// Centralized application themes for both light and dark modes.
 class AppTheme {
   AppTheme._();
 
@@ -108,13 +107,22 @@ class AppTheme {
           ),
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: colorScheme.surface,
         elevation: 1.5,
-        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
         ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: brightness == Brightness.dark
+            ? colorScheme.surface.withOpacity(0.95)
+            : colorScheme.surface,
+        contentTextStyle: textTheme.bodyMedium?.copyWith(
+          color: colorScheme.onSurface,
+        ),
+        actionTextColor: colorScheme.primary,
       ),
       chipTheme: ChipThemeData(
         backgroundColor: colorScheme.secondaryContainer,
@@ -139,6 +147,4 @@ class AppTheme {
 
 // Typedef to accommodate `Apptheme.lightTheme` references in main.dart.
 typedef Apptheme = AppTheme;
-
-
 
