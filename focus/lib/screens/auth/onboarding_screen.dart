@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../app/constants.dart';
-import '../../widgets/custom_buttom.dart';
+import '/app/constants.dart';
+import '/widgets/custom_buttom.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});

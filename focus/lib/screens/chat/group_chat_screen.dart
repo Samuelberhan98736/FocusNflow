@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../models/message_model.dart';
-import '../../services/api_client.dart';
-import '../../services/chat_service.dart';
-import '../../utils/snackbar.dart';
-import '../../widgets/message_bubble.dart';
+import '/models/message_model.dart';
+import '/services/api_client.dart';
+import '/services/chat_service.dart';
+import '/utils/snackbar.dart';
+import '/widgets/message_bubble.dart';
 
 class GroupChatScreen extends StatefulWidget {
   const GroupChatScreen({super.key, this.roomId});
