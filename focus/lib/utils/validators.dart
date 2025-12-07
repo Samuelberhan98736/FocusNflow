@@ -1,4 +1,4 @@
-/// Common form field validators used across the app.
+//Common form field validators used across the app.
 class Validators {
   static String? requiredField(
     String? value, {

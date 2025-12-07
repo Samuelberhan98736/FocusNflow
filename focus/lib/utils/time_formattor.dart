@@ -1,4 +1,4 @@
-/// Lightweight time and date formatting helpers (no intl dependency).
+// Lightweight time and date formatting helpers (no intl dependency).
 
 const _monthAbbreviations = [
   'Jan',

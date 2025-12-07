@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Shows a floating snackbar, replacing any existing one.
+// Shows a floating snackbar, replacing any existing one.
 void showAppSnackBar(
   BuildContext context,
   String message, {
