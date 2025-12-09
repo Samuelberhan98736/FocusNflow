@@ -8,92 +8,117 @@ import '../../utils/validators.dart';
 import '../../widgets/custom_buttom.dart';
 import '../../widgets/custom_input.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
   bool _loading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
+    if (_passwordController.text.trim() != _confirmController.text.trim()) {
+      showAppSnackBar(context, 'Passwords do not match', isError: true);
+      return;
+    }
     setState(() => _loading = true);
+
     final auth = context.read<AuthService>();
-    final error = await auth.login(
+    final error = await auth.signUp(
       email: _emailController.text.trim(),
+      name: _nameController.text.trim(),
       password: _passwordController.text.trim(),
     );
+
     if (!mounted) return;
     setState(() => _loading = false);
 
     if (error != null) {
       showAppSnackBar(context, error, isError: true);
-    } else {
-      showAppSnackBar(context, 'Welcome back!');
-      Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+      return;
     }
+
+    showAppSnackBar(context, 'Account created');
+    Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
   }
 
-  void _goToSignup() {
-    Navigator.of(context).pushReplacementNamed(AppRoutes.signup);
+  void _goToLogin() {
+    Navigator.of(context).pushReplacementNamed(AppRoutes.login);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Log In')),
+      appBar: AppBar(title: const Text('Create Account')),
       body: Padding(
         padding: defaultScreenPadding,
         child: Form(
           key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               Text(
-                'FocusNFlow',
+                'Join FocusNFlow',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              CustomInput(
+                controller: _nameController,
+                label: 'Full name',
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+              ),
+              const SizedBox(height: 12),
               CustomInput(
                 controller: _emailController,
                 label: 'Email',
                 keyboardType: TextInputType.emailAddress,
                 validator: Validators.email,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
               CustomInput(
                 controller: _passwordController,
                 label: 'Password',
                 obscureText: true,
                 validator: (v) => Validators.password(v, minLength: 6),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+              CustomInput(
+                controller: _confirmController,
+                label: 'Confirm password',
+                obscureText: true,
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Please confirm password' : null,
+              ),
+              const SizedBox(height: 20),
               CustomButton(
-                label: 'Log In',
+                label: 'Create Account',
                 onPressed: _submit,
                 isLoading: _loading,
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: _goToSignup,
-                child: const Text('Create an account'),
-              )
+                onPressed: _goToLogin,
+                child: const Text('Already have an account? Log in'),
+              ),
             ],
           ),
         ),

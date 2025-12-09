@@ -10,6 +10,10 @@ class OnboardingScreen extends StatelessWidget {
     Navigator.of(context).pushReplacementNamed(AppRoutes.login);
   }
 
+  void _goToSignup(BuildContext context) {
+    Navigator.of(context).pushReplacementNamed(AppRoutes.signup);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,9 +36,14 @@ class OnboardingScreen extends StatelessWidget {
             ),
             const SizedBox(height: 32),
             CustomButton(
-              label: 'Get Started',
-              onPressed: () => _goToLogin(context),
+              label: 'Create an account',
+              onPressed: () => _goToSignup(context),
             ),
+            const SizedBox(height: 12),
+            TextButton(
+              onPressed: () => _goToLogin(context),
+              child: const Text('I already have an account'),
+            )
           ],
         ),
       ),
