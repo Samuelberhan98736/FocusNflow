@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../screens/auth/login_screen.dart';
 import '../screens/auth/onboarding_screen.dart';
+import '../screens/auth/signup_screen.dart';
 import '../screens/chat/group_chat_screen.dart';
 import '../screens/groups/create_group_screen.dart';
 import '../screens/groups/group_detail_screen.dart';
@@ -19,7 +20,7 @@ import '../services/auth_service.dart';
 
 import 'constants.dart';
 
-/// Centralized route generator for the app.
+//Centralized route generator for the app.
 class AppRouter {
   AppRouter._();
 
@@ -33,6 +34,8 @@ class AppRouter {
         return _page(settings, const OnboardingScreen());
       case AppRoutes.login:
         return _page(settings, const LoginScreen());
+      case AppRoutes.signup:
+        return _page(settings, const SignupScreen());
       case AppRoutes.dashboard:
         return _page(settings, const DashboardScreen());
       case AppRoutes.studyGroups:
