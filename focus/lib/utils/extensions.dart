@@ -3,11 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'time_formattor.dart';
 
 extension StringExtensions on String {
-  /// Capitalizes the first character.
+  // Capitalizes the first character.
   String get capitalized =>
       isEmpty ? this : '${this[0].toUpperCase()}${substring(1)}';
 
-  /// Returns initials from the string when used as a name.
+  // Returns initials from the string when used as a name.
   String get initials {
     final parts = trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
     final chars = parts.take(2).map((p) => p[0].toUpperCase()).join();
@@ -16,7 +16,7 @@ extension StringExtensions on String {
 }
 
 extension DurationExtensions on Duration {
-  /// Formats the duration as mm:ss (e.g., 05:30).
+  // Formats the duration as mm:ss (e.g., 05:30).
   String get mmSs => durationToMmSs(this);
 }
 

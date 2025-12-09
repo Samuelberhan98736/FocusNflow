@@ -4,6 +4,28 @@ import 'api_client.dart';
 class RoomService {
   final _api = ApiClient.instance;
   final _db = FirebaseFirestore.instance;
+  bool _seedAttempted = false;
+
+  // Seed default rooms if Firestore is empty (helps first-time setup/dev).
+  Future<void> seedDefaultRoomsIfEmpty() async {
+    if (_seedAttempted) return;
+    _seedAttempted = true;
+
+    try {
+      final existing = await _db.collection("study_rooms").limit(1).get();
+      if (existing.docs.isNotEmpty) return;
+
+      final batch = _db.batch();
+      for (final room in _defaultRooms) {
+        final ref = _db.collection("study_rooms").doc(room["roomId"] as String);
+        batch.set(ref, room);
+      }
+      await batch.commit();
+    } catch (e) {
+      print("Error seeding rooms: $e");
+      _seedAttempted = false; // allow retry later
+    }
+  }
 
   // Get all study rooms once
   Future<List<Map<String, dynamic>>> getAllRooms() async {
@@ -85,3 +107,26 @@ class RoomService {
     }
   }
 }
+
+final List<Map<String, dynamic>> _defaultRooms = List.unmodifiable(
+  [
+    for (var i = 601; i <= 610; i++)
+      {
+        "roomId": "$i",
+        "name": "Room $i",
+        "isAvailable": true,
+        "reserved_by": null,
+        "reserved_at": null,
+        "last_updated": null,
+      },
+    for (var i = 611; i <= 615; i++)
+      {
+        "roomId": "$i",
+        "name": "Room $i",
+        "isAvailable": false,
+        "reserved_by": null,
+        "reserved_at": null,
+        "last_updated": null,
+      },
+  ],
+);

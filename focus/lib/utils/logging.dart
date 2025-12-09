@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-/// Minimal logging utility that respects debug/release modes.
+// Minimal logging utility that respects debug/release modes.
 enum LogLevel { debug, info, warning, error }
 
 class Log {
