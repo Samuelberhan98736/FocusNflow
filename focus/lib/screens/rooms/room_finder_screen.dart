@@ -26,6 +26,10 @@ class RoomFinderScreen extends StatelessWidget {
               (snapshot.data ?? []).map((e) => RoomModel.fromMap(e)).toList();
 
           if (rooms.isEmpty) {
+            roomService.seedDefaultRoomsIfEmpty();
+          }
+
+          if (rooms.isEmpty) {
             return const Center(child: Text('No rooms available'));
           }
 

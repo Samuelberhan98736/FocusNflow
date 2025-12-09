@@ -23,12 +23,14 @@ class RoomMapWidget extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          var rooms = (snapshot.data ?? [])
-              .map((e) => RoomModel.fromMap(e))
-              .toList();
+          var rooms =
+              (snapshot.data ?? []).map((e) => RoomModel.fromMap(e)).toList();
 
-          // Fallback to static map data if Firestore is empty.
-          rooms = rooms.isEmpty ? _defaultRooms : rooms;
+          // If empty, try to seed defaults so reservations work.
+          if (rooms.isEmpty) {
+            roomService.seedDefaultRoomsIfEmpty();
+            rooms = _defaultRooms;
+          }
 
           return Padding(
             padding: const EdgeInsets.all(16),
