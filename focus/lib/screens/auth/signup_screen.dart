@@ -56,7 +56,11 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     showAppSnackBar(context, 'Account created');
-    Navigator.of(context).pushReplacementNamed(AppRoutes.dashboard);
+    // Send new users straight to the main dashboard and clear auth stack.
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.dashboard,
+      (route) => false,
+    );
   }
 
   void _goToLogin() {
