@@ -4,6 +4,8 @@ class RoomModel {
   final bool isAvailable;
   final String? reservedBy;
   final DateTime? reservedAt;
+  final double? latitude;
+  final double? longitude;
 
   RoomModel({
     required this.roomId,
@@ -11,9 +13,18 @@ class RoomModel {
     required this.isAvailable,
     this.reservedBy,
     this.reservedAt,
+    this.latitude,
+    this.longitude,
   });
 
   factory RoomModel.fromMap(Map<String, dynamic> data) {
+    double? _parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value);
+      return null;
+    }
+
     return RoomModel(
       roomId: data["roomId"] ?? "",
       name: data["name"] ?? "",
@@ -22,6 +33,8 @@ class RoomModel {
       reservedAt: data["reserved_at"] != null
           ? DateTime.tryParse(data["reserved_at"].toString())
           : null,
+      latitude: _parseDouble(data["lat"]),
+      longitude: _parseDouble(data["lng"]),
     );
   }
 
@@ -32,6 +45,8 @@ class RoomModel {
       "isAvailable": isAvailable,
       "reserved_by": reservedBy,
       "reserved_at": reservedAt?.toIso8601String(),
+      "lat": latitude,
+      "lng": longitude,
     };
   }
 }

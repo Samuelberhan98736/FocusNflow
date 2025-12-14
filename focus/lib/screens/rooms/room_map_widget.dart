@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/constants.dart';
@@ -6,9 +7,11 @@ import '../../models/room_model.dart';
 import '../../services/room_service.dart';
 import '../../widgets/availability.dart';
 
-/// Static floor map with clickable room pins.
+/// Google Maps-based floor map with clickable room pins.
 class RoomMapWidget extends StatelessWidget {
   const RoomMapWidget({super.key});
+
+  static const LatLng _fallbackTarget = LatLng(33.7537, -84.3863);
 
   @override
   Widget build(BuildContext context) {
@@ -26,139 +29,78 @@ class RoomMapWidget extends StatelessWidget {
           var rooms =
               (snapshot.data ?? []).map((e) => RoomModel.fromMap(e)).toList();
 
-          // If empty, try to seed defaults so reservations work.
+          // If empty, seed defaults so reservations work and show a map.
           if (rooms.isEmpty) {
             roomService.seedDefaultRoomsIfEmpty();
             rooms = _defaultRooms;
           }
 
-          return Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                const _Legend(),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: InteractiveViewer(
-                    minScale: 0.9,
-                    maxScale: 2.2,
-                    child: AspectRatio(
-                      aspectRatio: 4 / 3,
-                      child: LayoutBuilder(
-                        builder: (_, box) {
-                          final positions = _generatePositions(rooms.length);
-                          final width = box.maxWidth;
-                          final height = box.maxHeight;
+          final markers = _buildMarkers(context, rooms);
+          final initialTarget =
+              markers.isNotEmpty ? markers.first.position : _fallbackTarget;
 
-                          return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(18),
-                              color:
-                                  Theme.of(context).colorScheme.surfaceVariant,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(18),
-                              child: Stack(
-                                children: [
-                                  Positioned.fill(
-                                    child: Image.asset(
-                                      'lib/assets/Building.png',
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  _FloorPlanOverlay(),
-                                  for (var i = 0; i < rooms.length; i++)
-                                    Positioned(
-                                      left: positions[i].dx * width,
-                                      top: positions[i].dy * height,
-                                      child: _RoomPin(room: rooms[i]),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+          return Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: _Legend(),
+              ),
+              Expanded(
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: initialTarget,
+                    zoom: 18,
                   ),
+                  markers: markers,
+                  compassEnabled: true,
+                  mapToolbarEnabled: false,
+                  zoomControlsEnabled: false,
+                  myLocationButtonEnabled: false,
+                  padding: const EdgeInsets.all(12),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
     );
   }
-}
 
-class _RoomPin extends StatelessWidget {
-  const _RoomPin({required this.room});
+  Set<Marker> _buildMarkers(BuildContext context, List<RoomModel> rooms) {
+    return rooms.map((room) {
+      final target = _targetFor(room);
+      final hue =
+          room.isAvailable ? BitmapDescriptor.hueGreen : BitmapDescriptor.hueRed;
 
-  final RoomModel room;
+      return Marker(
+        markerId: MarkerId(room.roomId),
+        position: target,
+        icon: BitmapDescriptor.defaultMarkerWithHue(hue),
+        infoWindow: InfoWindow(
+          title: room.name,
+          snippet: room.isAvailable ? 'Available' : 'Occupied',
+          onTap: () {
+            Navigator.of(context).pushNamed(
+              AppRoutes.roomDetail,
+              arguments: room.roomId,
+            );
+          },
+        ),
+        onTap: () {
+          Navigator.of(context).pushNamed(
+            AppRoutes.roomDetail,
+            arguments: room.roomId,
+          );
+        },
+      );
+    }).toSet();
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    final isAvailable = room.isAvailable;
-    final color = isAvailable
-        ? Colors.green.shade500
-        : Theme.of(context).colorScheme.error;
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushNamed(
-          AppRoutes.roomDetail,
-          arguments: room.roomId,
-        );
-      },
-      child: Column(
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-              border: Border.all(color: color, width: 2),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.meeting_room_outlined,
-                  size: 18,
-                  color: color,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  room.name,
-                  style: Theme.of(context).textTheme.labelLarge,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 6),
-          Container(
-            width: 14,
-            height: 14,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Theme.of(context).colorScheme.surface,
-                width: 2,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  LatLng _targetFor(RoomModel room) {
+    if (room.latitude != null && room.longitude != null) {
+      return LatLng(room.latitude!, room.longitude!);
+    }
+    return _fallbackTarget;
   }
 }
 
@@ -181,88 +123,140 @@ class _Legend extends StatelessWidget {
   }
 }
 
-class _FloorPlanOverlay extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final dividerColor =
-        Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.15);
-
-    return CustomPaint(
-      painter: _FloorPainter(dividerColor),
-      size: Size.infinite,
-    );
-  }
-}
-
-class _FloorPainter extends CustomPainter {
-  _FloorPainter(this.dividerColor);
-
-  final Color dividerColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = dividerColor
-      ..strokeWidth = 2;
-
-    // Draw simple hallways and vertical dividers.
-    canvas.drawLine(
-      Offset(size.width * 0.05, size.height * 0.3),
-      Offset(size.width * 0.95, size.height * 0.3),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.05, size.height * 0.65),
-      Offset(size.width * 0.95, size.height * 0.65),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.35, size.height * 0.1),
-      Offset(size.width * 0.35, size.height * 0.9),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.65, size.height * 0.1),
-      Offset(size.width * 0.65, size.height * 0.9),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-List<Offset> _generatePositions(int count) {
-  const cols = 4;
-  final rows = (count / cols).ceil().clamp(1, 6);
-  final positions = <Offset>[];
-
-  for (var i = 0; i < count; i++) {
-    final row = i ~/ cols;
-    final col = i % cols;
-    final dx = (col + 1) / (cols + 1); // spread evenly across width
-    final dy = (row + 1) / (rows + 1); // spread evenly across height
-    positions.add(Offset(dx, dy));
-  }
-
-  return positions;
-}
-
 final List<RoomModel> _defaultRooms = [
-  for (var i = 601; i <= 610; i++)
-    RoomModel(
-      roomId: '$i',
-      name: 'Room $i',
-      isAvailable: true,
-      reservedBy: null,
-      reservedAt: null,
-    ),
-  for (var i = 611; i <= 615; i++)
-    RoomModel(
-      roomId: '$i',
-      name: 'Room $i',
-      isAvailable: false,
-      reservedBy: null,
-      reservedAt: null,
-    ),
+  RoomModel(
+    roomId: '601',
+    name: 'Room 601',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7525,
+    longitude: -84.3868,
+  ),
+  RoomModel(
+    roomId: '602',
+    name: 'Room 602',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7526,
+    longitude: -84.3866,
+  ),
+  RoomModel(
+    roomId: '603',
+    name: 'Room 603',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7527,
+    longitude: -84.3864,
+  ),
+  RoomModel(
+    roomId: '604',
+    name: 'Room 604',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7528,
+    longitude: -84.3862,
+  ),
+  RoomModel(
+    roomId: '605',
+    name: 'Room 605',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7529,
+    longitude: -84.386,
+  ),
+  RoomModel(
+    roomId: '606',
+    name: 'Room 606',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.753,
+    longitude: -84.3858,
+  ),
+  RoomModel(
+    roomId: '607',
+    name: 'Room 607',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7531,
+    longitude: -84.3856,
+  ),
+  RoomModel(
+    roomId: '608',
+    name: 'Room 608',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7532,
+    longitude: -84.3854,
+  ),
+  RoomModel(
+    roomId: '609',
+    name: 'Room 609',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7533,
+    longitude: -84.3852,
+  ),
+  RoomModel(
+    roomId: '610',
+    name: 'Room 610',
+    isAvailable: true,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7534,
+    longitude: -84.385,
+  ),
+  RoomModel(
+    roomId: '611',
+    name: 'Room 611',
+    isAvailable: false,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7535,
+    longitude: -84.3848,
+  ),
+  RoomModel(
+    roomId: '612',
+    name: 'Room 612',
+    isAvailable: false,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7536,
+    longitude: -84.3846,
+  ),
+  RoomModel(
+    roomId: '613',
+    name: 'Room 613',
+    isAvailable: false,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7537,
+    longitude: -84.3844,
+  ),
+  RoomModel(
+    roomId: '614',
+    name: 'Room 614',
+    isAvailable: false,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7538,
+    longitude: -84.3842,
+  ),
+  RoomModel(
+    roomId: '615',
+    name: 'Room 615',
+    isAvailable: false,
+    reservedBy: null,
+    reservedAt: null,
+    latitude: 33.7539,
+    longitude: -84.384,
+  ),
 ];
